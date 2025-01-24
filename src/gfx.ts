@@ -45,16 +45,23 @@ export const loadTestGraphics = (renderer: UIRenderer) => {
 
 export const gameStateToUiState = (gameState: GameWorld): UIWorld => {
   return {
+    text: [
+      {
+        x: 0,
+        y: 0,
+        value: `${gameState.player.movement[0]},${gameState.player.movement[1]}`,
+      },
+    ],
     sprites: [
       {
-        x: gameState.player.x,
-        y: gameState.player.y,
+        x: Math.round(gameState.player.x),
+        y: Math.round(gameState.player.y),
         animation: ANIM_PLAYER,
         id: 0,
       },
       ...gameState.boxes.map((box, index) => ({
-        x: box.x,
-        y: box.y,
+        x: Math.round(box.x),
+        y: Math.round(box.y),
         animation: ANIM_BOX,
         id: index + 1,
       })),

@@ -25,7 +25,14 @@ export type StoredAnimationState = {
   lastFrameChange: number;
 };
 
+export type UIText = {
+  x: number;
+  y: number;
+  value: string;
+};
+
 export type UIWorld = {
+  text: UIText[];
   sprites: UIAnimationInstance[];
 };
 
@@ -87,7 +94,7 @@ export const getUIRenderer = ({
 
     if (!image)
       fatalError(
-        `No animation image found ${currentSprite.image} for animation ${JSON.stringify(animation)}`,
+        `No animation image found ${currentSprite.image} for animation ${JSON.stringify(animation)}`
       );
 
     if (image.type === 1) {
@@ -120,6 +127,15 @@ export const getUIRenderer = ({
         updateAnimation(sprite, now);
         renderSprite(sprite);
       });
+
+      if (world.text.length > 0) {
+        ctx.font = "16px Arial";
+        ctx.textBaseline = "top";
+        ctx.fillStyle = "black";
+        world.text.forEach((text) => {
+          ctx.fillText(text.value, text.x, text.y);
+        });
+      }
     },
   };
 };

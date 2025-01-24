@@ -58,7 +58,7 @@ const init = () => {
     canvas.canvas,
     canvas.ctx,
     config.screenWidth,
-    config.screenHeight,
+    config.screenHeight
   );
 
   const keyboardInput = createKeyboardInputEmitter({
@@ -87,9 +87,11 @@ const init = () => {
       y: 10,
       width: 10,
       height: 10,
-      direction: 2,
-      speed: 50,
+      // direction: 2,
+      // speed: 50,
+      movement: [0, 0],
     },
+    gravity: [0, 9.8],
   });
 
   const onRequestAnimationFrame = (delta: number) => {
