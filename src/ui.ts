@@ -1,16 +1,40 @@
 import { CanvasObjects, ScreenInfo } from "canvas";
+import { fatalError } from "./util";
 
 export type UISprite = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  image: number;
   //   image: HTMLImageElement;
 };
 
-export type UIWorld = {
-  sprites: UISprite[];
+export type UIAnimation = {
+  width: number;
+  height: number;
+  frames: UISprite[];
+  frameTime: number;
 };
+
+export type UIAnimationInstance = {
+  id: number;
+  x: number;
+  y: number;
+  animation: number;
+};
+
+export type StoredAnimationState = {
+  currentFrame: number;
+  lastFrameChange: number;
+};
+
+export type UIWorld = {
+  sprites: UIAnimationInstance[];
+};
+
+type ImageBox = {
+  type: 1;
+  color: string;
+};
+
+type Image = ImageBox;
 
 export const getUIRenderer = ({
   ctx,
@@ -18,19 +42,86 @@ export const getUIRenderer = ({
   height,
   width,
 }: CanvasObjects & ScreenInfo) => {
+  const images: Record<number, Image> = {};
+  const animations: Record<number, UIAnimation> = {};
+  const animationState: Record<number, StoredAnimationState> = {};
+
   const cls = () => {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, width, height);
   };
 
+  const updateAnimation = (instance: UIAnimationInstance, now: number) => {
+    const animation = animations[instance.animation];
+    if (!animation) return;
+
+    if (!animationState[instance.id]) {
+      animationState[instance.id] = {
+        currentFrame: 0,
+        lastFrameChange: now,
+      };
+    }
+
+    const storedState = animationState[instance.id];
+
+    // Update animation
+    if (animation.frames.length > 1) {
+      if (now - storedState.lastFrameChange > animation.frameTime) {
+        storedState.currentFrame =
+          (storedState.currentFrame + 1) % animation.frames.length;
+
+        storedState.lastFrameChange = now;
+      }
+    }
+  };
+
+  const renderSprite = (instance: UIAnimationInstance) => {
+    const animation = animations[instance.animation];
+    if (!animation) fatalError("No animation found", instance.animation);
+
+    const storedState = animationState[instance.id];
+    if (!storedState) fatalError("No stored state found", instance.id);
+
+    const currentSprite = animation.frames[storedState.currentFrame];
+    const image = images[currentSprite.image];
+
+    if (!image)
+      fatalError(
+        `No animation image found ${currentSprite.image} for animation ${JSON.stringify(animation)}`,
+      );
+
+    if (image.type === 1) {
+      // Filled box
+      ctx.fillStyle = image.color;
+    }
+
+    ctx.fillRect(instance.x, instance.y, animation.width, animation.height);
+
+    // ctx.drawImage(
+    //   currentSprite.image,
+    //   currentSprite.x,
+    //   currentSprite.y,
+    //   currentSprite.width,
+    //   currentSprite.height
+    // );
+  };
+
   return {
-    render(world: UIWorld) {
+    loadImageRect(id: number, colour: string) {
+      images[id] = { color: colour, type: 1 };
+    },
+    loadAnimation(id: number, animation: UIAnimation) {
+      animations[id] = animation;
+    },
+    render(world: UIWorld, now: number) {
       cls();
 
-      ctx.fillStyle = "red";
       world.sprites.forEach((sprite) => {
-        ctx.fillRect(sprite.x, sprite.y, sprite.width, sprite.height);
+        updateAnimation(sprite, now);
+        renderSprite(sprite);
       });
     },
   };
 };
+
+export type UIRenderer = ReturnType<typeof getUIRenderer>;

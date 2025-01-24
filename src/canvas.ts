@@ -19,7 +19,7 @@ const buildScreenInfo = ({ canvas }: CanvasObjects): ScreenInfo => {
 
 const drawSomething = (
   ctx: CanvasRenderingContext2D,
-  screen: ScreenInfo
+  screen: ScreenInfo,
 ): void => {
   ctx.fillStyle = "red";
   ctx.fillRect(0, 0, screen.width, screen.height);
@@ -40,7 +40,7 @@ export const initCanvas = (
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
   canvasFixedWidth: number,
-  canvasFixedHeight: number
+  canvasFixedHeight: number,
 ) => {
   const minMargin = 20;
   const maxWidth = canvasFixedWidth;

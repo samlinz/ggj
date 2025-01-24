@@ -6,6 +6,8 @@ import {
   readFileSync,
   unlinkSync,
   writeFileSync,
+  accessSync,
+  mkdirSync,
 } from "node:fs";
 import path from "node:path";
 import { CHARS_LOWAL, generateRandomString } from "./src/util";
@@ -21,6 +23,15 @@ const cssFile = `style.${build}.css`;
 const buildFile = `./BUILD`;
 const oldBuild = readFileSync(buildFile, "utf-8");
 const newBuild = String(Number(oldBuild) + 1);
+
+const fileExists = (file: string) => {
+  try {
+    accessSync(file);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
 
 const clean = async () => {
   console.log(`Cleaning ${outDir}`);
@@ -95,6 +106,11 @@ const writeBuild = () => {
 };
 
 const run = async () => {
+  if (!fileExists(outDir)) {
+    console.log("Creating output directory");
+    mkdirSync(outDir);
+  }
+
   console.log("Cleaning...");
   clean();
 

@@ -1,6 +1,9 @@
 import { getCanvas, initCanvas } from "canvas";
+import { getGameLogic } from "game";
+import { createKeyboardInputEmitter } from "input";
+import { getUIRenderer } from "ui";
 import { noop } from "./util";
-import { getUIRenderer, UIWorld } from "ui";
+import { gameStateToUiState, loadTestGraphics } from "gfx";
 
 type Config = {
   debug: boolean;
@@ -55,32 +58,63 @@ const init = () => {
     canvas.canvas,
     canvas.ctx,
     config.screenWidth,
-    config.screenHeight
+    config.screenHeight,
   );
+
+  const keyboardInput = createKeyboardInputEmitter({
+    ...canvas,
+    document,
+  });
+
+  keyboardInput.init();
 
   const renderer = getUIRenderer(canvasInfo);
 
-  let uiWorld: UIWorld = {
-    sprites: [
+  loadTestGraphics(renderer);
+
+  const gameLogic = getGameLogic();
+  gameLogic.setWorld({
+    boxes: [
       {
-        x: 10,
-        y: 10,
-        width: 100,
-        height: 100,
+        x: 100,
+        y: 100,
+        width: 10,
+        height: 10,
       },
     ],
-  };
+    player: {
+      x: 10,
+      y: 10,
+      width: 10,
+      height: 10,
+      direction: 2,
+      speed: 50,
+    },
+  });
 
-  setInterval(() => {
-    uiWorld.sprites[0].x += 1;
-  }, 10);
+  const onRequestAnimationFrame = (delta: number) => {
+    const now = Date.now(); // probably accurate enough
 
-  const onRequestAnimationFrame = () => {
-    renderer.render(uiWorld);
+    // Get input
+    const input = keyboardInput.getAndClearBuffer();
+
+    // Update game state
+    gameLogic.update(delta, input);
+
+    const gameState = gameLogic.getWorld();
+    if (gameState) {
+      const uiWorld = gameStateToUiState(gameState);
+
+      // Update UI
+      renderer.render(uiWorld, now);
+    }
+
+    // Request next frame
     window.requestAnimationFrame(onRequestAnimationFrame);
   };
 
-  onRequestAnimationFrame();
+  // Start loop
+  onRequestAnimationFrame(0);
 };
 
 document.addEventListener("DOMContentLoaded", init);

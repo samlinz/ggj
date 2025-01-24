@@ -4,7 +4,7 @@ export const CHARS_LOWAL = "abcdefghijklmnopqrstuvwxyz";
 
 export const generateRandomString = (
   length: number,
-  characters = CHARS_ALNUM
+  characters = CHARS_ALNUM,
 ) => {
   let result = "";
   for (let i = 0; i < length; i++) {
@@ -15,8 +15,9 @@ export const generateRandomString = (
 
 export const noop = () => {};
 
-export const fatalError = (message: string): never => {
-  log.fatal(message);
-  document.write(`Fatal error: ${message}`);
-  throw new Error(message);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const fatalError = (...args: any[]): never => {
+  log.fatal(...args);
+  document.write(`Fatal error: ${args.join(" ")}`);
+  throw new Error("Fatal error");
 };
