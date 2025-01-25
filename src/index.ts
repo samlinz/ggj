@@ -2,27 +2,10 @@ import { getCanvas, initCanvas } from "canvas";
 import { getGameLogic } from "game";
 import { createKeyboardInputEmitter } from "input";
 import { getUIRenderer } from "ui";
-import { noop } from "./util";
+import { fatalError, noop } from "./util";
 import { gameStateToUiState, loadTestGraphics } from "gfx";
-
-type Config = {
-  debug: boolean;
-  canvasElementId: string;
-  screenWidth: number;
-  screenHeight: number;
-};
-
-const buildConfig = (): Config => {
-  // process.env is set by build system
-  const debug = process.env.ENV === "development";
-
-  return {
-    debug,
-    canvasElementId: "gameCanvas",
-    screenWidth: 1024,
-    screenHeight: 768,
-  };
-};
+import { createVoiceInputEmitter } from "./voiceinput";
+import { buildConfig, Config } from "config";
 
 const initLogger = (config: Config) => {
   const logger = {
@@ -43,7 +26,7 @@ const initLogger = (config: Config) => {
   window.log = logger;
 };
 
-const init = () => {
+const init = async () => {
   const config = buildConfig();
 
   initLogger(config);
@@ -66,7 +49,14 @@ const init = () => {
     document,
   });
 
+  const voiceInput = createVoiceInputEmitter({
+    ...canvas,
+    document,
+    config,
+  });
+
   keyboardInput.init();
+  await voiceInput.init();
 
   const renderer = getUIRenderer(canvasInfo);
 
@@ -92,13 +82,15 @@ const init = () => {
       movement: [0, 0],
     },
     gravity: [0, 9.8],
+    // gravity: [0, 5],
   });
 
   const onRequestAnimationFrame = (delta: number) => {
     const now = Date.now(); // probably accurate enough
 
     // Get input
-    const input = keyboardInput.getAndClearBuffer();
+    // const input = keyboardInput.getAndClearBuffer();
+    const input = voiceInput.getAndClearBuffer();
 
     // Update game state
     gameLogic.update(delta, input);
@@ -119,4 +111,10 @@ const init = () => {
   onRequestAnimationFrame(0);
 };
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await init();
+  } catch (error) {
+    fatalError("Failed to initialize game", error);
+  }
+});

@@ -1,11 +1,27 @@
 import { Vec2, vec2Add, vec2Scale } from "vec2";
-import {
-  Action,
-  ACTION_DOWN,
-  ACTION_LEFT,
-  ACTION_RIGHT,
-  ACTION_UP,
-} from "./input";
+
+export const ACTION_UP = "up";
+export const ACTION_LEFT = "left";
+export const ACTION_RIGHT = "right";
+export const ACTION_DOWN = "down";
+
+export type ActionUp = {
+  type: typeof ACTION_UP;
+};
+
+export type ActionLeft = {
+  type: typeof ACTION_LEFT;
+};
+
+export type ActionRight = {
+  type: typeof ACTION_RIGHT;
+};
+
+export type ActionDown = {
+  type: typeof ACTION_DOWN;
+};
+
+export type Action = ActionUp | ActionLeft | ActionRight | ActionDown;
 
 export type ObjectDimensions = {
   x: number;
@@ -68,6 +84,7 @@ export const getGameLogic = () => {
   const updatePlayerMovement = (actions: Action[]) => {
     for (const action of actions) {
       if (action.type === ACTION_UP) {
+        log.debug("Jump");
         world.player.movement[1] = -5;
       }
 

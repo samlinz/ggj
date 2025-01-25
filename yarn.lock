@@ -1072,6 +1072,11 @@ fastq@^1.6.0:
   dependencies:
     reusify "^1.0.4"
 
+fft.js@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/fft.js/-/fft.js-4.0.4.tgz#ffed83a397e58039141c804c1dbe1910dced8e6e"
+  integrity sha512-f9c00hphOgeQTlDyavwTtu6RiK8AIFjD6+jvXkNkpeQ7rirK3uFWVpalkoS4LAwbdX7mfZ8aoBfFVQX1Re/8aw==
+
 file-entry-cache@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/file-entry-cache/-/file-entry-cache-8.0.0.tgz#7787bddcf1131bffb92636c69457bbc0edd6d81f"
@@ -1560,6 +1565,13 @@ picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
+
+pitchy@3:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/pitchy/-/pitchy-3.0.1.tgz#d2360b2b86af7997ffbfa77779416456c849013e"
+  integrity sha512-oM0wZ2mh0IHf7nysLgsqnWqi2zgzM0t3iEGvhucJp2TYZvNrsGw/HFctwMPUxCZ4uAFRo6rFDS1L++QXri1p1Q==
+  dependencies:
+    fft.js "^4.0.4"
 
 portscanner@2.2.0:
   version "2.2.0"

@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "pitchy": "3"
+  },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
     "@types/clean-css": "^4.2.11",
