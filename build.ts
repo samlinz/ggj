@@ -1,7 +1,6 @@
 import esbuild from "esbuild";
 import CleanCSS from "clean-css";
 import {
-  copyFileSync,
   readdirSync,
   readFileSync,
   unlinkSync,
@@ -15,6 +14,7 @@ import { CHARS_LOWAL, generateRandomString } from "./src/util";
 const APP_NAME = "Funny game";
 
 const build = generateRandomString(10, CHARS_LOWAL);
+const imgDir = "imgs";
 const outDir = "dist";
 const scriptFile = `bundle.${build}.js`;
 const cssFile = `style.${build}.css`;
@@ -44,7 +44,7 @@ const clean = async () => {
   }
 };
 
-const transformAndCopyHtml = (js: string, css: string) => {
+const transformAndCopyHtml = (js: string, css: string, images: string) => {
   let html = readFileSync("src/index.html", "utf-8");
 
   // console.log(`Copying ${cssFile} to ${outDir}`);
@@ -57,6 +57,7 @@ const transformAndCopyHtml = (js: string, css: string) => {
     $STYLE: `<style>${css}</style>`,
     $TITLE: APP_NAME,
     $NOTE: `${APP_NAME} - Build ${newBuild} ${build} - ${new Date().toISOString()}`,
+    $IMAGES: images,
   };
 
   console.log("Transforming index.html");
@@ -69,6 +70,23 @@ const transformAndCopyHtml = (js: string, css: string) => {
   writeFileSync(path.join(outDir, "index.html"), html, {
     encoding: "utf-8",
   });
+};
+
+const buildImage = (path: string) => {
+  const imageName = path.split("/").pop()!.split(".")[0];
+  const imageId = `IMG_${imageName.toUpperCase()}`;
+  //.replace(/[^A-Z]/g, "_")}`;
+  const imageBuffer = readFileSync(path);
+  const base64Image = imageBuffer.toString("base64");
+  const mimeType = "image/png"; // Adjust if necessary
+  return `<img id="${imageId}" src="data:${mimeType};base64,${base64Image}" alt="Image">`;
+};
+
+const buildInlineImages = () => {
+  const imagePaths = readdirSync(imgDir);
+  console.log("Building inline images", imagePaths);
+  const images = imagePaths.map((path) => buildImage(`${imgDir}/${path}`));
+  return images.join("\n");
 };
 
 const buildCode = async () => {
@@ -118,8 +136,9 @@ const run = async () => {
 
   const js = await buildCode();
   const css = minifyCss();
+  const images = buildInlineImages();
 
-  transformAndCopyHtml(js, css);
+  transformAndCopyHtml(js, css, images);
 
   writeBuild();
 };

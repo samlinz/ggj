@@ -1,5 +1,5 @@
 import { CanvasObjects } from "canvas";
-import { Action } from "game";
+import { Action } from "flappygame";
 
 export const createKeyboardInputEmitter = ({
   document,

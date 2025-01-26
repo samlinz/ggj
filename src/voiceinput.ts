@@ -1,6 +1,6 @@
 import { CanvasObjects } from "canvas";
 import { WithConfig } from "config";
-import { Action, ACTION_UP } from "game";
+import { Action, ACTION_DOWN, ACTION_UP } from "flappygame";
 import { PitchDetector } from "pitchy";
 
 export const createVoiceInputEmitter = ({
@@ -28,8 +28,19 @@ export const createVoiceInputEmitter = ({
     const clarityNormalized = Math.round(clarity * 100);
 
     if (clarityNormalized > config.voiceInputClarityThreshold) {
-      if (pitchNormalized > config.voiceInputPitchTreshold) {
-        console.log({ clarity: clarityNormalized, pitch: pitchNormalized });
+      log.debug({ clarity: clarityNormalized, pitch: pitchNormalized });
+
+      // if (
+      //   pitchNormalized > config.voiceInputPitchTreshold1 &&
+      //   pitchNormalized < config.voiceInputPitchTreshold2
+      // ) {
+      //   inputBuffer.push({ type: ACTION_DOWN });
+      // }
+
+      if (
+        pitchNormalized > config.voiceInputPitchTreshold2 &&
+        pitchNormalized < config.voiceInputPitchTreshold3
+      ) {
         inputBuffer.push({ type: ACTION_UP });
       }
     }

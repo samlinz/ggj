@@ -25,27 +25,45 @@ export type StoredAnimationState = {
   lastFrameChange: number;
 };
 
+export const UITextAnchorTop = 1;
+export const UITextAnchorCenter = 1;
 export type UIText = {
   x: number;
   y: number;
   value: string;
+  anchor: number;
+};
+
+export type UIBox = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 };
 
 export type UIWorld = {
   text: UIText[];
   sprites: UIAnimationInstance[];
+  boxes: UIBox[];
 };
 
+export const UIImageTypeBox = 1;
+export const UIImageTypeImg = 2;
+
 type ImageBox = {
-  type: 1;
+  type: typeof UIImageTypeBox;
   color: string;
 };
 
-type Image = ImageBox;
+type ImageImg = {
+  type: typeof UIImageTypeImg;
+  element: HTMLImageElement;
+};
+
+type Image = ImageBox | ImageImg;
 
 export const getUIRenderer = ({
   ctx,
-  canvas,
   height,
   width,
 }: CanvasObjects & ScreenInfo) => {
@@ -54,7 +72,7 @@ export const getUIRenderer = ({
   const animationState: Record<number, StoredAnimationState> = {};
 
   const cls = () => {
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "silver";
     ctx.fillRect(0, 0, width, height);
   };
 
@@ -97,12 +115,20 @@ export const getUIRenderer = ({
         `No animation image found ${currentSprite.image} for animation ${JSON.stringify(animation)}`
       );
 
-    if (image.type === 1) {
+    if (image.type === UIImageTypeBox) {
       // Filled box
       ctx.fillStyle = image.color;
+      ctx.fillRect(instance.x, instance.y, animation.width, animation.height);
+    } else if (image.type === UIImageTypeImg) {
+      // Image
+      ctx.drawImage(
+        image.element,
+        instance.x,
+        instance.y,
+        animation.width,
+        animation.height
+      );
     }
-
-    ctx.fillRect(instance.x, instance.y, animation.width, animation.height);
 
     // ctx.drawImage(
     //   currentSprite.image,
@@ -115,24 +141,35 @@ export const getUIRenderer = ({
 
   return {
     loadImageRect(id: number, colour: string) {
-      images[id] = { color: colour, type: 1 };
+      images[id] = { color: colour, type: UIImageTypeBox };
+    },
+    loadImage(id: number, element: HTMLImageElement) {
+      images[id] = { type: UIImageTypeImg, element };
     },
     loadAnimation(id: number, animation: UIAnimation) {
       animations[id] = animation;
     },
     render(world: UIWorld, now: number) {
-      cls();
+      // cls();
 
       world.sprites.forEach((sprite) => {
         updateAnimation(sprite, now);
         renderSprite(sprite);
       });
 
+      if (world.boxes.length > 0) {
+        ctx.fillStyle = "black";
+        world.boxes.forEach((box) => {
+          ctx.fillRect(box.x, box.y, box.w, box.h);
+        });
+      }
+
       if (world.text.length > 0) {
         ctx.font = "16px Arial";
-        ctx.textBaseline = "top";
+        // ctx.textBaseline = "top";
         ctx.fillStyle = "black";
         world.text.forEach((text) => {
+          ctx.textBaseline = text.anchor === UITextAnchorTop ? "top" : "middle";
           ctx.fillText(text.value, text.x, text.y);
         });
       }

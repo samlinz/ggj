@@ -1,9 +1,9 @@
 import { getCanvas, initCanvas } from "canvas";
-import { getGameLogic } from "game";
-import { createKeyboardInputEmitter } from "input";
+import { getFlappyBubbleGameLogic } from "flappygame";
+// import { createKeyboardInputEmitter } from "input";
 import { getUIRenderer } from "ui";
 import { fatalError, noop } from "./util";
-import { gameStateToUiState, loadTestGraphics } from "gfx";
+import { flappyBubbleUiAdapter, loadRealGraphics } from "gfx";
 import { createVoiceInputEmitter } from "./voiceinput";
 import { buildConfig, Config } from "config";
 
@@ -44,10 +44,10 @@ const init = async () => {
     config.screenHeight
   );
 
-  const keyboardInput = createKeyboardInputEmitter({
-    ...canvas,
-    document,
-  });
+  // const keyboardInput = createKeyboardInputEmitter({
+  //   ...canvas,
+  //   document,
+  // });
 
   const voiceInput = createVoiceInputEmitter({
     ...canvas,
@@ -55,35 +55,37 @@ const init = async () => {
     config,
   });
 
-  keyboardInput.init();
+  // keyboardInput.init();
   await voiceInput.init();
 
   const renderer = getUIRenderer(canvasInfo);
 
-  loadTestGraphics(renderer);
+  // loadTestGraphics(renderer);
+  loadRealGraphics(document)(canvasInfo, renderer);
 
-  const gameLogic = getGameLogic();
-  gameLogic.setWorld({
-    boxes: [
-      {
-        x: 100,
-        y: 100,
-        width: 10,
-        height: 10,
-      },
-    ],
-    player: {
-      x: 10,
-      y: 10,
-      width: 10,
-      height: 10,
-      // direction: 2,
-      // speed: 50,
-      movement: [0, 0],
-    },
-    gravity: [0, 9.8],
-    // gravity: [0, 5],
-  });
+  const gameLogic = getFlappyBubbleGameLogic();
+  gameLogic.init(canvasInfo);
+  // gameLogic.setWorld({
+  //   boxes: [
+  //     {
+  //       x: 100,
+  //       y: 100,
+  //       width: 10,
+  //       height: 10,
+  //     },
+  //   ],
+  //   player: {
+  //     x: 10,
+  //     y: 10,
+  //     width: 10,
+  //     height: 10,
+  //     // direction: 2,
+  //     // speed: 50,
+  //     movement: [0, 0],
+  //   },
+  //   gravity: [0, 9.8],
+  //   // gravity: [0, 5],
+  // });
 
   const onRequestAnimationFrame = (delta: number) => {
     const now = Date.now(); // probably accurate enough
@@ -97,7 +99,7 @@ const init = async () => {
 
     const gameState = gameLogic.getWorld();
     if (gameState) {
-      const uiWorld = gameStateToUiState(gameState);
+      const uiWorld = flappyBubbleUiAdapter(gameState, canvasInfo);
 
       // Update UI
       renderer.render(uiWorld, now);

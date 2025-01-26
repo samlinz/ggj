@@ -4,7 +4,9 @@ export type Config = {
   screenWidth: number;
   screenHeight: number;
   voiceInputClarityThreshold: number;
-  voiceInputPitchTreshold: number;
+  voiceInputPitchTreshold1: number;
+  voiceInputPitchTreshold2: number;
+  voiceInputPitchTreshold3: number;
   voiceInputUpdateInterval: number;
 };
 
@@ -22,7 +24,9 @@ export const buildConfig = (): Config => {
     screenWidth: 1024,
     screenHeight: 768,
     voiceInputClarityThreshold: 90,
-    voiceInputPitchTreshold: 100,
+    voiceInputPitchTreshold1: 50,
+    voiceInputPitchTreshold2: 80,
+    voiceInputPitchTreshold3: 300,
     voiceInputUpdateInterval: 100,
   };
 };
