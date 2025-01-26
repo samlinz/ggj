@@ -301,38 +301,7 @@ export const flappyBubbleUiAdapter = (
 
   return {
     text,
-    // text: [
-    //   // {
-    //   //   x: 0,
-    //   //   y: 0,
-    //   //   value: `${gameState.player.movement[0]},${gameState.player.movement[1]}`,
-    //   // },
-    // ],
-    // sprites: [
-    //   {
-    //     x: Math.round(gameState.player.x),
-    //     y: Math.round(gameState.player.y),
-    //     animation: ANIM_PLAYER,
-    //     id: 0,
-    //   },
-    // ],
     sprites,
     boxes,
-    // sprites: [
-    //   // ...gameState.boxes.map((box, i) => ({
-    //   //   x: Math.round(box.x),
-    //   //   y: Math.round(box.y),
-    //   //   // w: box.width,
-    //   //   // h: box.height,
-    //   // })),
-    // ],
-    // boxes: [
-    //   // {
-    //   //   x: Math.round(gameState.player.x),
-    //   //   y: Math.round(gameState.player.y),
-    //   //   w: gameState.player.width,
-    //   //   h: gameState.player.height,
-    //   // },
-    // ],
   };
 };
