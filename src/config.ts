@@ -23,10 +23,10 @@ export const buildConfig = (): Config => {
     canvasElementId: "gameCanvas",
     screenWidth: 1024,
     screenHeight: 768,
-    voiceInputClarityThreshold: 80,
+    voiceInputClarityThreshold: 90,
     voiceInputPitchTreshold1: 50,
     voiceInputPitchTreshold2: 80,
     voiceInputPitchTreshold3: 300,
-    voiceInputUpdateInterval: 30,
+    voiceInputUpdateInterval: 100,
   };
 };
