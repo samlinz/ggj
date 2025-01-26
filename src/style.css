@@ -23,4 +23,46 @@ canvas {
   display: block;
   width: 100%;
   height: 100%;
+  z-index: 1;
+}
+
+canvas.landscape {
+  width: 100%;
+  height: auto;
+  transform: rotate(90deg);
+}
+
+#input-list {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  list-style: none;
+  z-index: 2;
+  gap: 10px;
+  opacity: 0.5;
+}
+
+#input-list.landscape {
+  position: relative;
+  /* transform: rotate(90deg); */
+  background-color: #000;
+  color: #fff;
+  font-size: 10px;
+  /* top: 6%;
+  left: -23%; */
+}
+
+#input-list > li.selected {
+  text-decoration: underline;
+}
+
+#input-list > li {
+  cursor: pointer;
+}
+
+#input-list > li:hover {
+  text-decoration: underline;
 }

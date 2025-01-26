@@ -6,6 +6,27 @@ import { fatalError, noop } from "./util";
 import { flappyBubbleUiAdapter, loadRealGraphics } from "gfx";
 import { createVoiceInputEmitter } from "./voiceinput";
 import { buildConfig, Config } from "config";
+import { createKeyboardInputEmitter } from "keyboardinput";
+import { createTouchInputEmitter } from "touchinput";
+
+const inputChangeElements = {
+  voice: document.getElementById("input-voice"),
+  keyboard: document.getElementById("input-keyboard"),
+  touch: document.getElementById("input-touch"),
+};
+
+const inputType = localStorage.getItem("inputType") || "voice";
+
+Object.entries(inputChangeElements).forEach(([key, element]) => {
+  if (key === inputType) {
+    element!.classList.add("selected");
+  }
+
+  element!.addEventListener("click", () => {
+    localStorage.setItem("inputType", key);
+    window.location.reload();
+  });
+});
 
 const initLogger = (config: Config) => {
   const logger = {
@@ -44,19 +65,33 @@ const init = async () => {
     config.screenHeight
   );
 
-  // const keyboardInput = createKeyboardInputEmitter({
-  //   ...canvas,
-  //   document,
-  // });
+  let input: ReturnType<typeof createVoiceInputEmitter>;
 
-  const voiceInput = createVoiceInputEmitter({
-    ...canvas,
-    document,
-    config,
-  });
+  switch (inputType) {
+    case "voice":
+      input = createVoiceInputEmitter({
+        ...canvas,
+        document,
+        config,
+      });
+      break;
+    case "keyboard":
+      input = createKeyboardInputEmitter({
+        ...canvas,
+        document,
+      });
+      break;
+    case "touch":
+      input = createTouchInputEmitter({
+        ...canvas,
+        document,
+      });
+      break;
+    default:
+      return void fatalError("Unknown input type", inputType);
+  }
 
-  // keyboardInput.init();
-  await voiceInput.init();
+  await input.init();
 
   const renderer = getUIRenderer(canvasInfo);
 
@@ -65,37 +100,31 @@ const init = async () => {
 
   const gameLogic = getFlappyBubbleGameLogic();
   gameLogic.init(canvasInfo);
-  // gameLogic.setWorld({
-  //   boxes: [
-  //     {
-  //       x: 100,
-  //       y: 100,
-  //       width: 10,
-  //       height: 10,
-  //     },
-  //   ],
-  //   player: {
-  //     x: 10,
-  //     y: 10,
-  //     width: 10,
-  //     height: 10,
-  //     // direction: 2,
-  //     // speed: 50,
-  //     movement: [0, 0],
-  //   },
-  //   gravity: [0, 9.8],
-  //   // gravity: [0, 5],
-  // });
 
-  const onRequestAnimationFrame = (delta: number) => {
+  const targetFps = 60;
+  const targetDelta = 1000 / targetFps;
+  let lastUpdate = 0;
+
+  const scheduleNextFrame = () => {
+    window.requestAnimationFrame(onRequestAnimationFrame);
+  };
+
+  const onRequestAnimationFrame = (time: number) => {
+    const delta = time - lastUpdate;
+    if (delta < targetDelta) {
+      return void scheduleNextFrame();
+    }
+
+    lastUpdate = time - (delta % targetDelta);
+
     const now = Date.now(); // probably accurate enough
 
     // Get input
-    // const input = keyboardInput.getAndClearBuffer();
-    const input = voiceInput.getAndClearBuffer();
+    const inputBuffer = input.getAndClearBuffer();
+    // const input = voiceInput.getAndClearBuffer();
 
     // Update game state
-    gameLogic.update(delta, input);
+    gameLogic.update(time, inputBuffer);
 
     const gameState = gameLogic.getWorld();
     if (gameState) {
@@ -106,7 +135,8 @@ const init = async () => {
     }
 
     // Request next frame
-    window.requestAnimationFrame(onRequestAnimationFrame);
+    // window.requestAnimationFrame(onRequestAnimationFrame);
+    return void scheduleNextFrame();
   };
 
   // Start loop

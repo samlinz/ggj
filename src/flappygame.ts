@@ -37,10 +37,11 @@ type State = "running" | "gameover" | "starting";
 export type FlappyBubbleGameWorld = {
   state: State;
   player: ObjectDimensions & {
-    movement: Vec2;
+    // velocity: Vec2;
+    velocityY: number;
   };
   boxes: ObjectDimensions[];
-  gravity: Vec2;
+  gravity: number;
   screen: {
     width: number;
     height: number;
@@ -99,7 +100,8 @@ const randomInt = (min: number, max: number) => {
 export const getFlappyBubbleGameLogic = () => {
   let world: FlappyBubbleGameWorld;
 
-  let fps = 0;
+  const fps: number[] = [];
+  let fpsAvg = 0;
   let lastUpdate: number = 0;
 
   const generateObstacleIfNeeded = (time: number) => {
@@ -150,22 +152,35 @@ export const getFlappyBubbleGameLogic = () => {
     world.boxes = world.boxes.filter((box) => box.x + box.width > 0);
   };
 
-  const updatePlayer = (deltaSeconds: number) => {
+  const updatePlayer = (delta: number, actions: Action[]) => {
     const player = world.player;
-    const newPlayerVec = vec2Add(
-      player.movement,
-      vec2Scale(world.gravity, deltaSeconds)
-    );
 
+    player.velocityY += world.gravity * delta;
+
+    for (const action of actions) {
+      if (action.type === ACTION_UP) {
+        // newPlayerVec[1] = pixelsMoved(world.jumpSpeed, deltaSeconds);
+        player.velocityY = world.jumpSpeed;
+      }
+      // } else if (action.type === ACTION_DOWN) {
+      //   newPlayerVec[1] -= pixelsMoved(world.jumpSpeed, deltaSeconds);
+      // }
+    }
+    // const newPlayerVec = vec2Add(
+    //   player.movement,
+    //   vec2Scale(world.gravity, deltaSeconds)
+    // );
+
+    console.log(player.velocityY);
     // cap speed
-    if (newPlayerVec[1] > world.maxFallSpeed) {
-      newPlayerVec[1] = world.maxFallSpeed;
+    if (player.velocityY > world.maxFallSpeed) {
+      player.velocityY = world.maxFallSpeed;
     }
 
-    player.movement = newPlayerVec;
+    // player.movement = newPlayerVec;
 
-    player.x = player.x + player.movement[0];
-    player.y = player.y + player.movement[1];
+    // player.x = player.x + player.velocity[0] * delta;
+    player.y += player.velocityY * delta;
   };
 
   const gameOver = (time: number) => {
@@ -190,29 +205,34 @@ export const getFlappyBubbleGameLogic = () => {
       }
     }
 
-    // check if player is out of the screenk
+    // check if player is out of the screen
     if (player.y > world.screen.height + 200) {
       gameOver(time);
     }
   };
 
-  const updatePlayerMovement = (actions: Action[]) => {
-    for (const action of actions) {
-      if (action.type === ACTION_UP) {
-        world.player.movement[1] = world.jumpSpeed;
-      } else if (action.type === ACTION_DOWN) {
-        world.player.movement[1] -= world.jumpSpeed;
-      }
+  const updateScore = (time: number) => {
+    if (time - world.lastScoreIncrease > world.scoreIncreaseInterval) {
+      world.score += world.scoreIncrease;
+      world.lastScoreIncrease = time;
     }
   };
 
   const debug = (time: number, delta: number) => {
+    const fpsInTime = Math.round(1 / delta);
+    fps.push(fpsInTime);
+
     if (time - world.lastDebug > world.debugInterval) {
-      fps = Math.round(1000 / delta);
+      const sum = fps.reduce((acc, val) => acc + val, 0);
+      fpsAvg = Math.round(sum / fps.length);
+      fps.length = 0;
+
       log.debug("Debug info", {
         player: world.player,
         boxes: world.boxes,
+        fps: fpsAvg,
       });
+
       world.lastDebug = time;
     }
   };
@@ -238,22 +258,16 @@ export const getFlappyBubbleGameLogic = () => {
       return;
     }
 
-    const delta = time - lastUpdate;
-    const deltaSeconds = delta / 1000;
+    const delta = (time - lastUpdate) / 1000;
     lastUpdate = time;
 
-    const screenMovement = pixelsMoved(world.screenSpeed, deltaSeconds);
+    const screenMovement = pixelsMoved(world.screenSpeed, delta);
 
-    updatePlayerMovement(actions);
-    updatePlayer(deltaSeconds);
+    updatePlayer(delta, actions);
     generateObstacleIfNeeded(time);
     updateObstacles(screenMovement);
     checkCollisions(time);
-
-    if (time - world.lastScoreIncrease > world.scoreIncreaseInterval) {
-      world.score += world.scoreIncrease;
-      world.lastScoreIncrease = time;
-    }
+    updateScore(time);
 
     debug(time, delta);
   };
@@ -275,12 +289,14 @@ export const getFlappyBubbleGameLogic = () => {
         y: 10,
         width: PLAYER_W,
         height: PLAYER_H,
-        movement: [0, 0],
+        // velocity: [0, 0],
+        velocityY: 0,
       },
       boxes: [],
-      gravity: [0, 9.8],
+      // gravity: [0, 980],
+      gravity: 500,
       gap: 200,
-      maxFallSpeed: 30,
+      maxFallSpeed: 5000,
       lastObstacleGenerated: 0,
       obstacleGenerationInterval: 2000,
       obstacleW: PIPE_W,
@@ -289,7 +305,7 @@ export const getFlappyBubbleGameLogic = () => {
       lastDebug: 0,
       debugInterval: 1000,
       nextGameStartAt: undefined,
-      jumpSpeed: -5,
+      jumpSpeed: -300,
       lastCollisionCheck: 0,
       collisionTolerance: 30,
       collisionDetectionInterval: 100,
@@ -304,6 +320,6 @@ export const getFlappyBubbleGameLogic = () => {
     init,
     update,
     getWorld: () => world,
-    getFps: () => fps,
+    // getFps: () => fps,
   };
 };

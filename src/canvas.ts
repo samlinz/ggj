@@ -17,42 +17,60 @@ const buildScreenInfo = ({ canvas }: CanvasObjects): ScreenInfo => {
   };
 };
 
-const drawSomething = (
-  ctx: CanvasRenderingContext2D,
-  screen: ScreenInfo,
-): void => {
-  ctx.fillStyle = "red";
-  ctx.fillRect(0, 0, screen.width, screen.height);
+// const drawSomething = (
+//   ctx: CanvasRenderingContext2D,
+//   screen: ScreenInfo,
+// ): void => {
+//   ctx.fillStyle = "red";
+//   ctx.fillRect(0, 0, screen.width, screen.height);
 
-  // Redraw after resizing (optional)
-  ctx.fillStyle = "blue";
-  ctx.fillRect(50, 50, 100, 100);
-  ctx.fillStyle = "red";
-  ctx.beginPath();
-  ctx.arc(300, 300, 50, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
-  ctx.fillText("Hello, Canvas!", 400, 200);
-};
+//   // Redraw after resizing (optional)
+//   ctx.fillStyle = "blue";
+//   ctx.fillRect(50, 50, 100, 100);
+//   ctx.fillStyle = "red";
+//   ctx.beginPath();
+//   ctx.arc(300, 300, 50, 0, Math.PI * 2);
+//   ctx.fill();
+//   ctx.fillStyle = "white";
+//   ctx.font = "30px Arial";
+
+//   ctx.fillText("Hello, Canvas!", 400, 200);
+// };
 
 export const initCanvas = (
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
   canvasFixedWidth: number,
-  canvasFixedHeight: number,
+  canvasFixedHeight: number
 ) => {
   const minMargin = 20;
   const maxWidth = canvasFixedWidth;
   const aspectRatio = canvasFixedWidth / canvasFixedHeight;
 
+  // const isProbablyMobileScreen = true;
+  const isProbablyMobileScreen = window.innerWidth < window.innerHeight;
+
   canvas.width = canvasFixedWidth;
   canvas.height = canvasFixedHeight;
 
-  // Handle window resizing
-  function resizeCanvas() {
-    const { innerWidth, innerHeight } = window;
+  type ScreenSize = {
+    innerWidth: number;
+    innerHeight: number;
+  };
 
+  if (isProbablyMobileScreen) {
+    canvas.classList.add("landscape");
+    document.getElementById("input-list")?.classList.add("landscape");
+  }
+
+  const resizeLandscape = ({ innerWidth, innerHeight }: ScreenSize) => {
+    return {
+      newWidth: innerHeight,
+      newHeight: innerWidth,
+    };
+  };
+
+  const resizeDesktop = ({ innerWidth, innerHeight }: ScreenSize) => {
     const availableWidth = innerWidth - 2 * minMargin;
     const availableHeight = innerHeight - 2 * minMargin;
 
@@ -63,6 +81,17 @@ export const initCanvas = (
       newHeight = availableHeight;
       newWidth = availableHeight * aspectRatio;
     }
+
+    return { newWidth, newHeight };
+  };
+
+  // Handle window resizing
+  function resizeCanvas() {
+    const { innerWidth, innerHeight } = window;
+
+    const { newWidth, newHeight } = isProbablyMobileScreen
+      ? resizeLandscape({ innerWidth, innerHeight })
+      : resizeDesktop({ innerWidth, innerHeight });
 
     canvas.style.width = `${newWidth}px`;
     canvas.style.height = `${newHeight}px`;

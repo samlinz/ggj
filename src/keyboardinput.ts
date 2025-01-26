@@ -57,7 +57,7 @@ export const createKeyboardInputEmitter = ({
     }
   };
 
-  const init = () => {
+  const init = async () => {
     document.addEventListener("keydown", keyDownHandler);
     document.addEventListener("keyup", keyUpHandler);
   };
