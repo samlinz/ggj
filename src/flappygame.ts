@@ -171,7 +171,6 @@ export const getFlappyBubbleGameLogic = () => {
     //   vec2Scale(world.gravity, deltaSeconds)
     // );
 
-    console.log(player.velocityY);
     // cap speed
     if (player.velocityY > world.maxFallSpeed) {
       player.velocityY = world.maxFallSpeed;
