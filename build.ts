@@ -7,6 +7,7 @@ import {
   writeFileSync,
   accessSync,
   mkdirSync,
+  copyFileSync,
 } from "node:fs";
 import path from "node:path";
 import { CHARS_LOWAL, generateRandomString } from "./src/util";
@@ -141,6 +142,9 @@ const run = async () => {
   transformAndCopyHtml(js, css, images);
 
   writeBuild();
+
+  // copy to root
+  copyFileSync(path.join(outDir, "index.html"), "index.html");
 };
 
 run()
