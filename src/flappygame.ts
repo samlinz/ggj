@@ -113,6 +113,7 @@ export const getFlappyBubbleGameLogic = () => {
     ) {
       generateObstacle();
       world.timestamps.lastObstacleGenerated = time;
+      world.config.obstacleGenerationInterval = randomInt(1800, 2200);
     }
   };
 
@@ -128,17 +129,19 @@ export const getFlappyBubbleGameLogic = () => {
 
     const y1 = gapPosition - halfGap - world.config.obstacleH;
 
+    const w = randomInt(50, 200); // randomize pipe width
+
     const upperPart: ObjectDimensions = {
       x: x,
       y: y1,
-      width: world.config.obstacleW,
+      width: w,
       height: world.config.obstacleH,
     };
 
     const lowerPart: ObjectDimensions = {
       x: x,
       y: gapPosition + halfGap,
-      width: world.config.obstacleW,
+      width: w,
       height: world.config.obstacleH,
     };
 
