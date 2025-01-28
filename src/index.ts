@@ -96,7 +96,8 @@ const init = async () => {
   const renderer = getUIRenderer(canvasInfo);
 
   // loadTestGraphics(renderer);
-  loadRealGraphics(document)(canvasInfo, renderer);
+  const loadedSprites = loadRealGraphics(document)(canvasInfo, renderer);
+  const uiAdapter = flappyBubbleUiAdapter(loadedSprites);
 
   const gameLogic = getFlappyBubbleGameLogic();
   gameLogic.init(canvasInfo);
@@ -128,7 +129,7 @@ const init = async () => {
 
     const gameState = gameLogic.getWorld();
     if (gameState) {
-      const uiWorld = flappyBubbleUiAdapter(gameState, canvasInfo);
+      const uiWorld = uiAdapter(gameState, canvasInfo);
 
       // Update UI
       renderer.render(uiWorld, now);
