@@ -1,5 +1,5 @@
-import { CanvasObjects } from "canvas";
-import { Action, ACTION_UP } from "flappygame";
+import { Action, ACTION_UP } from "flappygame/flappy-game-actions";
+import { CanvasObjects } from "ui/canvas";
 
 export const createTouchInputEmitter = ({
   canvas,

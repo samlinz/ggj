@@ -8,9 +8,10 @@ import {
   accessSync,
   mkdirSync,
   copyFileSync,
+  statSync,
 } from "node:fs";
 import path from "node:path";
-import { CHARS_LOWAL, generateRandomString } from "./src/util";
+import { generateRandomString, CHARS_LOWAL } from "./src/util/util";
 
 const APP_NAME = "Funny game";
 
@@ -33,6 +34,15 @@ const fileExists = (file: string) => {
     return false;
   }
 };
+
+// Build cache files
+const buildMetadataDir = ".build_metadata";
+const imagesBuildMetadataFile = path.join(buildMetadataDir, "images.json");
+const imagesBuildDataFile = path.join(buildMetadataDir, "images.txt");
+
+if (!fileExists(buildMetadataDir)) {
+  mkdirSync(buildMetadataDir);
+}
 
 const clean = async () => {
   console.log(`Cleaning ${outDir}`);
@@ -76,18 +86,71 @@ const transformAndCopyHtml = (js: string, css: string, images: string) => {
 const buildImage = (path: string) => {
   const imageName = path.split("/").pop()!.split(".")[0];
   const imageId = `IMG_${imageName.toUpperCase()}`;
-  //.replace(/[^A-Z]/g, "_")}`;
   const imageBuffer = readFileSync(path);
   const base64Image = imageBuffer.toString("base64");
   const mimeType = "image/png"; // Adjust if necessary
   return `<img id="${imageId}" src="data:${mimeType};base64,${base64Image}" alt="Image">`;
 };
 
-const buildInlineImages = () => {
+const buildInlineImages = (): string => {
   const imagePaths = readdirSync(imgDir);
-  console.log("Building inline images", imagePaths);
-  const images = imagePaths.map((path) => buildImage(`${imgDir}/${path}`));
-  return images.join("\n");
+
+  const oldMetadata: Record<string, ImageMetadata> = fileExists(
+    imagesBuildMetadataFile
+  )
+    ? JSON.parse(readFileSync(imagesBuildMetadataFile, "utf-8"))
+    : {};
+
+  type ImageMetadata = {
+    name: string;
+    mtimeMs: number;
+  };
+
+  const canUseCache = !imagePaths.some((image) => {
+    const fullPath = `${imgDir}/${image}`;
+    const { mtimeMs } = statSync(fullPath);
+    return oldMetadata[image] ? oldMetadata[image].mtimeMs !== mtimeMs : true;
+  });
+
+  if (canUseCache && fileExists(imagesBuildDataFile)) {
+    console.log("Using cached images");
+    return readFileSync(imagesBuildDataFile, "utf-8");
+  }
+
+  const newMetadata: Record<string, ImageMetadata> = {};
+  const images: string[] = [];
+  for (const image of imagePaths) {
+    const fullPath = `${imgDir}/${image}`;
+    console.log("Building inline image", fullPath);
+
+    const { mtimeMs } = statSync(fullPath);
+
+    const inlineImage = buildImage(fullPath);
+
+    if (!inlineImage)
+      throw new Error(`Failed to build or load cached image ${image}`);
+
+    newMetadata[image] = {
+      name: image,
+      mtimeMs,
+    };
+
+    images.push(inlineImage);
+  }
+
+  const imageString = images.join("\n");
+
+  // Write cache
+
+  writeFileSync(imagesBuildMetadataFile, JSON.stringify(newMetadata), {
+    encoding: "utf-8",
+  });
+
+  writeFileSync(imagesBuildDataFile, imageString, {
+    encoding: "utf-8",
+  });
+
+  return imageString;
 };
 
 const buildCode = async () => {

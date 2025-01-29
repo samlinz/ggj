@@ -1,81 +1,14 @@
-import { CanvasObjects, ScreenInfo } from "canvas";
-import { fatalError } from "./util";
-
-type UIImageId = number;
-type UIAnimationId = number;
-
-export type UISpriteAnimated = {
-  frames: UIImageId[];
-  frameTime: number;
-};
-
-export type UISpriteStatic = {
-  frame: UIImageId;
-};
-
-export type UISprite = UISpriteAnimated | UISpriteStatic;
-
-export type UISpriteInstance = {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  animation: UIAnimationId;
-};
-
-export type StoredAnimationState = {
-  currentFrame: number;
-  lastFrameChange: number;
-};
-
-export const UITextAnchorTop = 1;
-export const UITextAnchorCenter = 1;
-export type UIText = {
-  x: number;
-  y: number;
-  value: string;
-  anchor: number;
-};
-
-export type UIBox = {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-};
-
-// export enum UIBackgroundType {
-//   Image,
-//   Colour,
-// }
-
-export type UIBackground = {
-  animation: UIAnimationId;
-};
-
-export type UIWorld = {
-  text: UIText[];
-  sprites: UISpriteInstance[];
-  boxes: UIBox[];
-  backgrounds: UIBackground[];
-  bgColour?: string;
-};
-
-export enum UIImageType {
-  Box,
-  Img,
-}
-type ImageBox = {
-  type: UIImageType.Box;
-  color: string;
-};
-
-type ImageImg = {
-  type: UIImageType.Img;
-  element: HTMLImageElement;
-};
-
-type Image = ImageBox | ImageImg;
+import { fatalError } from "../util/util";
+import { CanvasObjects, ScreenInfo } from "./canvas";
+import {
+  Image,
+  StoredAnimationState,
+  UIImageType,
+  UISprite,
+  UISpriteInstance,
+  UISpriteStatic,
+  UIWorld,
+} from "./renderer.types";
 
 export const getUIRenderer = ({
   ctx,
@@ -171,7 +104,7 @@ export const getUIRenderer = ({
       // ctx.textBaseline = "top";
       ctx.fillStyle = "black";
       world.text.forEach((text) => {
-        ctx.textBaseline = text.anchor === UITextAnchorTop ? "top" : "middle";
+        ctx.textBaseline = text.anchor;
         ctx.fillText(text.value, text.x, text.y);
       });
     }

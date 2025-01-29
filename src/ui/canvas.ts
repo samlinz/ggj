@@ -1,4 +1,4 @@
-import { fatalError } from "./util";
+import { fatalError } from "util/util";
 
 export type ScreenInfo = {
   width: number;
@@ -16,26 +16,6 @@ const buildScreenInfo = ({ canvas }: CanvasObjects): ScreenInfo => {
     height: canvas.height,
   };
 };
-
-// const drawSomething = (
-//   ctx: CanvasRenderingContext2D,
-//   screen: ScreenInfo,
-// ): void => {
-//   ctx.fillStyle = "red";
-//   ctx.fillRect(0, 0, screen.width, screen.height);
-
-//   // Redraw after resizing (optional)
-//   ctx.fillStyle = "blue";
-//   ctx.fillRect(50, 50, 100, 100);
-//   ctx.fillStyle = "red";
-//   ctx.beginPath();
-//   ctx.arc(300, 300, 50, 0, Math.PI * 2);
-//   ctx.fill();
-//   ctx.fillStyle = "white";
-//   ctx.font = "30px Arial";
-
-//   ctx.fillText("Hello, Canvas!", 400, 200);
-// };
 
 export const initCanvas = (
   canvas: HTMLCanvasElement,

@@ -1,35 +1,11 @@
-import { ScreenInfo } from "canvas";
-import { PIPE_H, PIPE_W, PLAYER_H, PLAYER_W } from "gfx";
-
-export const ACTION_UP = "up";
-export const ACTION_LEFT = "left";
-export const ACTION_RIGHT = "right";
-export const ACTION_DOWN = "down";
-
-export type ActionUp = {
-  type: typeof ACTION_UP;
-};
-
-export type ActionLeft = {
-  type: typeof ACTION_LEFT;
-};
-
-export type ActionRight = {
-  type: typeof ACTION_RIGHT;
-};
-
-export type ActionDown = {
-  type: typeof ACTION_DOWN;
-};
-
-export type Action = ActionUp | ActionLeft | ActionRight | ActionDown;
-
-export type ObjectDimensions = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
+import {
+  boxesOverlapWithTolerance,
+  ObjectDimensions,
+  pixelsMoved,
+  randomInt,
+} from "util/gamelogic.util";
+import { Action, ACTION_UP } from "./flappy-game-actions";
+import { ScreenInfo } from "ui/canvas";
 
 type State = "running" | "gameover" | "starting";
 
@@ -57,8 +33,11 @@ export type FlappyBubbleGameWorld = {
     jumpSpeed: number;
     obstacleGenerationInterval: number;
     maxFallSpeed: number;
-    obstacleW: number;
-    obstacleH: number;
+    obstacles: {
+      minW: number;
+      maxW: number;
+      h: number;
+    };
     screenSpeed: number;
     debugInterval: number;
     scoreIncreaseInterval: number;
@@ -66,37 +45,6 @@ export type FlappyBubbleGameWorld = {
     collisionTolerance: number;
     collisionDetectionInterval: number;
   };
-};
-
-const pixelsMoved = (speed: number, delta: number) => {
-  // pixels per second and timedelta as milliseconds
-  return speed * delta;
-};
-
-const boxesOverlap = (box1: ObjectDimensions, box2: ObjectDimensions) => {
-  return (
-    box1.x < box2.x + box2.width &&
-    box1.x + box1.width > box2.x &&
-    box1.y < box2.y + box2.height &&
-    box1.y + box1.height > box2.y
-  );
-};
-
-const boxesOverlapWithTolerance = (
-  box1: ObjectDimensions,
-  box2: ObjectDimensions,
-  tolerance: number = 0
-) => {
-  return (
-    box1.x < box2.x + box2.width - tolerance &&
-    box1.x + box1.width > box2.x + tolerance &&
-    box1.y < box2.y + box2.height - tolerance &&
-    box1.y + box1.height > box2.y + tolerance
-  );
-};
-
-const randomInt = (min: number, max: number) => {
-  return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
 export const getFlappyBubbleGameLogic = () => {
@@ -127,22 +75,25 @@ export const getFlappyBubbleGameLogic = () => {
     );
     const x = world.screen.width + 10;
 
-    const y1 = gapPosition - halfGap - world.config.obstacleH;
+    const y1 = gapPosition - halfGap - world.config.obstacles.h;
 
-    const w = randomInt(50, 200); // randomize pipe width
+    const w = randomInt(
+      world.config.obstacles.minW,
+      world.config.obstacles.maxW
+    ); // randomize pipe width
 
     const upperPart: ObjectDimensions = {
       x: x,
       y: y1,
       width: w,
-      height: world.config.obstacleH,
+      height: world.config.obstacles.h,
     };
 
     const lowerPart: ObjectDimensions = {
       x: x,
       y: gapPosition + halfGap,
       width: w,
-      height: world.config.obstacleH,
+      height: world.config.obstacles.h,
     };
 
     world.boxes.push(upperPart, lowerPart);
@@ -292,8 +243,8 @@ export const getFlappyBubbleGameLogic = () => {
       player: {
         x: 100,
         y: 10,
-        width: PLAYER_W,
-        height: PLAYER_H,
+        width: 50,
+        height: 50,
         velocityY: 0,
       },
       boxes: [],
@@ -311,8 +262,13 @@ export const getFlappyBubbleGameLogic = () => {
         jumpSpeed: -300,
         obstacleGenerationInterval: 2000,
         maxFallSpeed: 5000,
-        obstacleW: PIPE_W,
-        obstacleH: PIPE_H,
+        // obstacleW: PIPE_W,
+        // obstacleH: PIPE_H,
+        obstacles: {
+          minW: 50,
+          maxW: 200,
+          h: 827,
+        },
         screenSpeed: 200,
         debugInterval: 1000,
         scoreIncreaseInterval: 1000,

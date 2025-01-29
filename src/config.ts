@@ -8,6 +8,7 @@ export type Config = {
   voiceInputPitchTreshold2: number;
   voiceInputPitchTreshold3: number;
   voiceInputUpdateInterval: number;
+  targetFps: number;
 };
 
 export type WithConfig = {
@@ -28,5 +29,6 @@ export const buildConfig = (): Config => {
     voiceInputPitchTreshold2: 80,
     voiceInputPitchTreshold3: 300,
     voiceInputUpdateInterval: 100,
+    targetFps: 60,
   };
 };

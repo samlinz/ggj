@@ -1,7 +1,7 @@
-import { CanvasObjects } from "canvas";
 import { WithConfig } from "config";
-import { Action, ACTION_UP } from "flappygame";
+import { Action, ACTION_UP } from "flappygame/flappy-game-actions";
 import { PitchDetector } from "pitchy";
+import { CanvasObjects } from "ui/canvas";
 
 export const createVoiceInputEmitter = ({
   document,

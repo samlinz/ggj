@@ -1,13 +1,15 @@
-import { getCanvas, initCanvas } from "canvas";
-import { getFlappyBubbleGameLogic } from "flappygame";
+import { getFlappyBubbleGameLogic } from "flappygame/flappy-game-logic";
 // import { createKeyboardInputEmitter } from "input";
-import { getUIRenderer } from "ui";
-import { fatalError, noop } from "./util";
-import { flappyBubbleUiAdapter, loadRealGraphics } from "gfx";
+import { getUIRenderer } from "ui/canvas.renderer";
+import { fatalError } from "./util/util";
+import { loadRealGraphics } from "flappygame/flappy-images-loader";
 import { createVoiceInputEmitter } from "./voiceinput";
 import { buildConfig, Config } from "config";
 import { createKeyboardInputEmitter } from "keyboardinput";
 import { createTouchInputEmitter } from "touchinput";
+import { flappyBubbleUiAdapter } from "flappygame/flappy-gfx-adapter";
+import { getCanvas, initCanvas } from "ui/canvas";
+import { initLogger } from "util/logger";
 
 const inputChangeElements = {
   voice: document.getElementById("input-voice"),
@@ -27,25 +29,6 @@ Object.entries(inputChangeElements).forEach(([key, element]) => {
     window.location.reload();
   });
 });
-
-const initLogger = (config: Config) => {
-  const logger = {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fatal: (...args: any[]) => console.error(`FATAL: `, ...args),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    error: (...args: any[]) => console.error(`ERROR: `, ...args),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    warn: (...args: any[]) => console.warn(`WARN: `, ...args),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    info: (...args: any[]) => console.info(`INFO: `, ...args),
-    debug: config.debug
-      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (...args: any[]) => console.debug(`DEBUG: `, ...args)
-      : noop,
-  };
-
-  window.log = logger;
-};
 
 const init = async () => {
   const config = buildConfig();
@@ -102,13 +85,11 @@ const init = async () => {
   const gameLogic = getFlappyBubbleGameLogic();
   gameLogic.init(canvasInfo);
 
-  const targetFps = 60;
+  const targetFps = config.targetFps;
   const targetDelta = 1000 / targetFps;
   let lastUpdate = 0;
 
-  const scheduleNextFrame = () => {
-    window.requestAnimationFrame(onRequestAnimationFrame);
-  };
+  const scheduleNextFrame = () => {};
 
   const onRequestAnimationFrame = (time: number) => {
     const delta = time - lastUpdate;
@@ -136,7 +117,6 @@ const init = async () => {
     }
 
     // Request next frame
-    // window.requestAnimationFrame(onRequestAnimationFrame);
     return void scheduleNextFrame();
   };
 
