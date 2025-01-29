@@ -67,7 +67,6 @@ export const flappyBubbleUiAdapter =
 
       sprites.push(
         ...gameState.boxes.map((box, i) => ({
-          id: 40 + i,
           x: Math.round(box.x),
           y: Math.round(box.y),
           w: box.width,
