@@ -89,7 +89,9 @@ const init = async () => {
   const targetDelta = 1000 / targetFps;
   let lastUpdate = 0;
 
-  const scheduleNextFrame = () => {};
+  const scheduleNextFrame = () => {
+    requestAnimationFrame(onRequestAnimationFrame);
+  };
 
   const onRequestAnimationFrame = (time: number) => {
     const delta = time - lastUpdate;
